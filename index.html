@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>音符の名前フラッシュカード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Music&family=Zen+Maru+Gothic:wght@500;700;900&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf5f4; --card:#ffffff; --ink:#3a3436; --sub:#8b7f81;
+    --red:#e0574c; --red-d:#c0392b; --red-soft:#fde3df; --line:#eeddda;
+    --shadow:0 10px 30px rgba(192,57,43,.12);
+    font-family:'Zen Maru Gothic','M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{background:var(--bg);color:var(--ink);display:flex;justify-content:center;
+       align-items:flex-start;min-height:100dvh;padding:16px;}
+  .app{width:100%;max-width:460px;}
+  .screen{display:none;animation:fade .25s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .mus{font-family:'Noto Music',"Segoe UI Symbol","Apple Symbols",sans-serif;line-height:1;color:var(--ink);}
+  .dyn{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:bold;color:var(--ink);}
+
+  .head{text-align:center;margin:6px 0 18px;}
+  .head .badge{display:inline-flex;align-items:center;gap:8px;background:var(--red-soft);
+       color:var(--red-d);padding:6px 14px;border-radius:999px;font-weight:700;font-size:13px;}
+  h1{font-size:25px;margin:12px 0 4px;font-weight:900;}
+  .head p{margin:0;color:var(--sub);font-size:14px;font-weight:500;}
+
+  .panel{background:var(--card);border-radius:22px;padding:20px 18px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .label{font-size:15px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+  .label .dot{width:10px;height:10px;border-radius:50%;background:var(--red);}
+  .label .cnt{margin-left:auto;font-size:12px;color:var(--sub);font-weight:600;}
+
+  .cats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .cat{position:relative;border:2.5px solid var(--line);background:#fff;border-radius:16px;
+       padding:14px 6px 12px;text-align:center;cursor:pointer;transition:.15s;
+       display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;}
+  .cat .ci{height:46px;display:flex;align-items:center;justify-content:center;font-size:40px;}
+  .cat .cn{font-weight:700;font-size:15px;}
+  .cat .ck{font-size:11px;color:var(--sub);font-weight:500;}
+  .cat.on{border-color:var(--red);background:var(--red-soft);}
+  .cat.on .cn{color:var(--red-d);}
+  .cat .check{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;
+       background:var(--red);color:#fff;display:none;align-items:center;justify-content:center;font-size:13px;}
+  .cat.on .check{display:flex;}
+
+  .counts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .count{border:2.5px solid var(--line);background:#fff;border-radius:16px;padding:16px 6px;
+       text-align:center;cursor:pointer;transition:.15s;font-weight:700;font-size:17px;user-select:none;}
+  .count small{display:block;font-size:11px;color:var(--sub);font-weight:500;margin-top:2px;}
+  .count.on{border-color:var(--red);background:var(--red-soft);color:var(--red-d);}
+
+  details.list{background:var(--card);border-radius:22px;box-shadow:var(--shadow);margin-bottom:16px;padding:4px 2px;}
+  details.list>summary{list-style:none;cursor:pointer;padding:18px;font-weight:700;font-size:15px;
+       display:flex;align-items:center;justify-content:space-between;}
+  details.list>summary::-webkit-details-marker{display:none;}
+  details.list>summary .chev{transition:.2s;color:var(--sub);}
+  details.list[open]>summary .chev{transform:rotate(180deg);}
+  .listbody{padding:0 16px 18px;}
+  .listcat{font-weight:700;color:var(--red-d);font-size:14px;margin:16px 0 8px;
+       padding-bottom:4px;border-bottom:2px dotted var(--line);}
+  .listgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:8px;}
+  .li{background:#fdf7f6;border:1px solid var(--line);border-radius:12px;padding:10px 4px;
+       display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
+  .li .lg{height:40px;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:1;}
+  .li .lg svg{height:34px;width:auto;max-width:76px;}
+  .li .lg .dyn{font-size:30px;}
+  .li .ln{font-size:11px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .li .lm{font-size:10px;color:var(--sub);line-height:1.2;}
+
+  .start{width:100%;border:none;border-radius:18px;padding:20px;background:var(--red);color:#fff;
+       font-size:20px;font-weight:800;cursor:pointer;font-family:inherit;
+       box-shadow:0 8px 20px rgba(224,87,76,.35);transition:.15s;letter-spacing:.04em;}
+  .start:active{transform:translateY(2px);box-shadow:0 4px 12px rgba(224,87,76,.35);}
+  .warn{text-align:center;color:var(--red-d);font-size:13px;font-weight:700;margin:10px 0 0;height:16px;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .back{display:inline-flex;align-items:center;gap:6px;border:none;background:#fff;color:var(--ink);
+       font-weight:700;font-size:15px;padding:10px 16px;border-radius:999px;cursor:pointer;
+       font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .back:active{transform:scale(.97);}
+  .prog{font-weight:700;color:var(--sub);font-size:15px;}
+  .prog b{color:var(--red-d);font-size:19px;}
+  .bar{height:8px;background:#f0e2df;border-radius:999px;overflow:hidden;margin-bottom:16px;}
+  .bar>i{display:block;height:100%;background:var(--red);border-radius:999px;transition:width .3s ease;}
+
+  .flash{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:24px;
+       cursor:pointer;user-select:none;text-align:center;min-height:62dvh;display:flex;flex-direction:column;}
+  .glyph{flex:1;display:flex;align-items:center;justify-content:center;min-height:180px;}
+  .glyph .mus{font-size:clamp(96px,30vw,150px);}
+  .glyph .dyn{font-size:clamp(64px,20vw,112px);}
+  .glyph svg{width:min(64vw,260px);height:auto;max-height:34dvh;}
+  .answer{opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;}
+  .flash.revealed .answer{opacity:1;transform:none;}
+  .yomi{color:var(--sub);font-size:16px;font-weight:700;letter-spacing:.05em;margin-bottom:2px;min-height:20px;}
+  .name{font-size:30px;font-weight:900;color:var(--ink);}
+  .mean{display:inline-block;margin-top:14px;background:var(--red-soft);color:var(--red-d);
+       padding:8px 18px;border-radius:999px;font-weight:700;font-size:15px;}
+  .hint{margin-top:18px;color:var(--sub);font-weight:700;font-size:15px;min-height:20px;
+       display:flex;align-items:center;justify-content:center;gap:8px;}
+  .hint .tap{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--red-soft);
+       color:var(--red-d);align-items:center;justify-content:center;animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+
+  .done{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:40px 24px;text-align:center;margin-top:20px;}
+  .done .big{font-size:64px;margin-bottom:8px;}
+  .done h2{font-size:26px;margin:0 0 6px;font-weight:900;}
+  .done p{color:var(--sub);margin:0 0 24px;font-weight:500;}
+  .done .btns{display:flex;flex-direction:column;gap:12px;}
+  .done button{border:none;border-radius:16px;padding:16px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .again{background:var(--red);color:#fff;box-shadow:0 6px 16px rgba(224,87,76,.3);}
+  .toset{background:#fff;color:var(--ink);border:2.5px solid var(--line);}
+  .again:active,.toset:active{transform:translateY(2px);}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="settings" class="screen active">
+    <div class="head">
+      <span class="badge">♪ おんがく</span>
+      <h1>音符の名前フラッシュカード</h1>
+      <p>おぼえたいものをえらんで、スタート！</p>
+    </div>
+    <div class="panel">
+      <p class="label"><span class="dot"></span>なにをおぼえる？</p>
+      <div class="cats" id="cats">
+        <div class="cat on" data-cat="note"><span class="check">✓</span><div class="ci mus" data-ico="note"></div><div class="cn">音符</div><div class="ck">おんぷ</div></div>
+        <div class="cat on" data-cat="rest"><span class="check">✓</span><div class="ci mus" data-ico="rest"></div><div class="cn">休符</div><div class="ck">きゅうふ</div></div>
+        <div class="cat on" data-cat="mark"><span class="check">✓</span><div class="ci mus" data-ico="mark"></div><div class="cn">記号</div><div class="ck">きごう</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="label"><span class="dot"></span>もんだいのかず</p>
+      <div class="counts" id="counts">
+        <div class="count" data-count="5">5<small>もん</small></div>
+        <div class="count on" data-count="10">10<small>もん</small></div>
+        <div class="count" data-count="all">ぜんぶ<small>ぜんもん</small></div>
+      </div>
+    </div>
+    <details class="list">
+      <summary>カードのいちらんを みる <span class="chev">▼</span></summary>
+      <div class="listbody" id="listbody"></div>
+    </details>
+    <button class="start" id="start">スタート ▶</button>
+    <p class="warn" id="warn"></p>
+  </section>
+
+  <section id="card" class="screen">
+    <div class="topbar">
+      <button class="back" id="back">← もどる</button>
+      <span class="prog"><b id="pnow">1</b> / <span id="ptot">10</span></span>
+    </div>
+    <div class="bar"><i id="fill"></i></div>
+    <div class="flash" id="flash">
+      <div class="glyph" id="glyph"></div>
+      <div class="answer">
+        <div class="yomi" id="yomi"></div>
+        <div class="name" id="name"></div>
+        <div class="mean" id="mean"></div>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </section>
+
+  <section id="done" class="screen">
+    <div class="done">
+      <div class="big">🎉</div>
+      <h2>ぜんぶ できたね！</h2>
+      <p id="donenum"></p>
+      <div class="btns">
+        <button class="again" id="again">もういちど</button>
+        <button class="toset" id="toset">せっていにもどる</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const SVGMAP = {"三連符": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"10\" y1=\"50\" x2=\"130\" y2=\"50\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"10\" y1=\"59\" x2=\"130\" y2=\"59\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"10\" y1=\"68\" x2=\"130\" y2=\"68\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"10\" y1=\"77\" x2=\"130\" y2=\"77\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"10\" y1=\"86\" x2=\"130\" y2=\"86\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><ellipse cx=\"34\" cy=\"86\" rx=\"9\" ry=\"7\" fill=\"#3a3436\" transform=\"rotate(-20 34 86)\"/><rect x=\"41\" y=\"46\" width=\"3\" height=\"42\" fill=\"#3a3436\"/><ellipse cx=\"64\" cy=\"86\" rx=\"9\" ry=\"7\" fill=\"#3a3436\" transform=\"rotate(-20 64 86)\"/><rect x=\"71\" y=\"46\" width=\"3\" height=\"42\" fill=\"#3a3436\"/><ellipse cx=\"94\" cy=\"86\" rx=\"9\" ry=\"7\" fill=\"#3a3436\" transform=\"rotate(-20 94 86)\"/><rect x=\"101\" y=\"46\" width=\"3\" height=\"42\" fill=\"#3a3436\"/><rect x=\"41\" y=\"44\" width=\"60\" height=\"5\" fill=\"#3a3436\"/><text x=\"64\" y=\"34\" font-family=\"Georgia,serif\" font-size=\"22\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">3</text></svg>", "クレッシェンド": "<svg viewBox=\"0 0 136 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"18\" y1=\"60\" x2=\"118\" y2=\"42\" stroke=\"#3a3436\" stroke-width=\"4\" stroke-linecap=\"round\"/><line x1=\"18\" y1=\"60\" x2=\"118\" y2=\"78\" stroke=\"#3a3436\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "デクレッシェンド": "<svg viewBox=\"0 0 136 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"118\" y1=\"60\" x2=\"18\" y2=\"42\" stroke=\"#3a3436\" stroke-width=\"4\" stroke-linecap=\"round\"/><line x1=\"118\" y1=\"60\" x2=\"18\" y2=\"78\" stroke=\"#3a3436\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "タイ": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"40\" cy=\"60\" rx=\"13\" ry=\"10\" fill=\"#3a3436\" transform=\"rotate(-20 40 60)\"/><ellipse cx=\"100\" cy=\"60\" rx=\"13\" ry=\"10\" fill=\"#3a3436\" transform=\"rotate(-20 100 60)\"/><path d=\"M40 76 Q70 96 100 76\" fill=\"none\" stroke=\"#3a3436\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "スラー": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"40\" cy=\"72\" rx=\"13\" ry=\"10\" fill=\"#3a3436\" transform=\"rotate(-20 40 72)\"/><ellipse cx=\"100\" cy=\"72\" rx=\"13\" ry=\"10\" fill=\"#3a3436\" transform=\"rotate(-20 100 72)\"/><path d=\"M38 58 Q70 34 102 58\" fill=\"none\" stroke=\"#3a3436\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "スタッカート": "<svg viewBox=\"0 0 100 120\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"56\" rx=\"12\" ry=\"9\" fill=\"#3a3436\" transform=\"rotate(-22 50 56)\"/><rect x=\"37\" y=\"56\" width=\"3.6\" height=\"44\" rx=\"1.8\" fill=\"#3a3436\"/><circle cx=\"50\" cy=\"32\" r=\"4.8\" fill=\"#3a3436\"/></svg>", "テヌート": "<svg viewBox=\"0 0 100 120\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"56\" rx=\"12\" ry=\"9\" fill=\"#3a3436\" transform=\"rotate(-22 50 56)\"/><rect x=\"37\" y=\"56\" width=\"3.6\" height=\"44\" rx=\"1.8\" fill=\"#3a3436\"/><rect x=\"39\" y=\"30\" width=\"22\" height=\"4.5\" rx=\"2.2\" fill=\"#3a3436\"/></svg>", "アクセント": "<svg viewBox=\"0 0 100 120\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"56\" rx=\"12\" ry=\"9\" fill=\"#3a3436\" transform=\"rotate(-22 50 56)\"/><rect x=\"37\" y=\"56\" width=\"3.6\" height=\"44\" rx=\"1.8\" fill=\"#3a3436\"/><path d=\"M39 26 L63 33 L39 40\" fill=\"none\" stroke=\"#3a3436\" stroke-width=\"4.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>", "ブレス": "<svg viewBox=\"0 0 132 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"48\" x2=\"120\" y2=\"48\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"58\" x2=\"120\" y2=\"58\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"68\" x2=\"120\" y2=\"68\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"78\" x2=\"120\" y2=\"78\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"88\" x2=\"120\" y2=\"88\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><path d=\"M67 26 L76 45 L85 26\" fill=\"none\" stroke=\"#3a3436\" stroke-width=\"4.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>", "五線": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"44\" x2=\"128\" y2=\"44\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"56\" x2=\"128\" y2=\"56\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"68\" x2=\"128\" y2=\"68\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"80\" x2=\"128\" y2=\"80\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"92\" x2=\"128\" y2=\"92\" stroke=\"#c9b8bb\" stroke-width=\"2\"/></svg>", "加線": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"52\" x2=\"128\" y2=\"52\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"63\" x2=\"128\" y2=\"63\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"74\" x2=\"128\" y2=\"74\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"85\" x2=\"128\" y2=\"85\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"96\" x2=\"128\" y2=\"96\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"60\" y1=\"30\" x2=\"92\" y2=\"30\" stroke=\"#3a3436\" stroke-width=\"3\"/><ellipse cx=\"76\" cy=\"30\" rx=\"11\" ry=\"8\" fill=\"#3a3436\" transform=\"rotate(-20 76 30)\"/></svg>", "小節線": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"40\" x2=\"128\" y2=\"40\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"51\" x2=\"128\" y2=\"51\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"62\" x2=\"128\" y2=\"62\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"73\" x2=\"128\" y2=\"73\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"84\" x2=\"128\" y2=\"84\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"80\" y1=\"40\" x2=\"80\" y2=\"84\" stroke=\"#3a3436\" stroke-width=\"4\"/></svg>", "終止線": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"40\" x2=\"124\" y2=\"40\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"51\" x2=\"124\" y2=\"51\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"62\" x2=\"124\" y2=\"62\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"73\" x2=\"124\" y2=\"73\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"84\" x2=\"124\" y2=\"84\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"108\" y1=\"40\" x2=\"108\" y2=\"84\" stroke=\"#3a3436\" stroke-width=\"3\"/><rect x=\"114\" y=\"40\" width=\"7\" height=\"44\" fill=\"#3a3436\"/></svg>", "4分の2拍子": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"38\" x2=\"110\" y2=\"38\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"49\" x2=\"110\" y2=\"49\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"60\" x2=\"110\" y2=\"60\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"71\" x2=\"110\" y2=\"71\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"82\" x2=\"110\" y2=\"82\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><text x=\"72\" y=\"58\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">2</text><text x=\"72\" y=\"90\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">4</text></svg>", "4分の3拍子": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"38\" x2=\"110\" y2=\"38\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"49\" x2=\"110\" y2=\"49\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"60\" x2=\"110\" y2=\"60\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"71\" x2=\"110\" y2=\"71\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"82\" x2=\"110\" y2=\"82\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><text x=\"72\" y=\"58\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">3</text><text x=\"72\" y=\"90\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">4</text></svg>", "4分の4拍子": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"38\" x2=\"110\" y2=\"38\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"49\" x2=\"110\" y2=\"49\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"60\" x2=\"110\" y2=\"60\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"71\" x2=\"110\" y2=\"71\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"82\" x2=\"110\" y2=\"82\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><text x=\"72\" y=\"58\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">4</text><text x=\"72\" y=\"90\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">4</text></svg>", "8分の6拍子": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"12\" y1=\"38\" x2=\"110\" y2=\"38\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"49\" x2=\"110\" y2=\"49\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"60\" x2=\"110\" y2=\"60\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"71\" x2=\"110\" y2=\"71\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"12\" y1=\"82\" x2=\"110\" y2=\"82\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><text x=\"72\" y=\"58\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">6</text><text x=\"72\" y=\"90\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">8</text></svg>", "リピート": "<svg viewBox=\"0 0 140 120\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"20\" y1=\"40\" x2=\"128\" y2=\"40\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"20\" y1=\"51\" x2=\"128\" y2=\"51\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"20\" y1=\"62\" x2=\"128\" y2=\"62\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"20\" y1=\"73\" x2=\"128\" y2=\"73\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"20\" y1=\"84\" x2=\"128\" y2=\"84\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><circle cx=\"96\" cy=\"62\" r=\"4\" fill=\"#3a3436\"/><circle cx=\"96\" cy=\"84\" r=\"4\" fill=\"#3a3436\"/><line x1=\"108\" y1=\"40\" x2=\"108\" y2=\"84\" stroke=\"#3a3436\" stroke-width=\"3\"/><rect x=\"114\" y=\"40\" width=\"7\" height=\"44\" fill=\"#3a3436\"/></svg>", "1番2番かっこ": "<svg viewBox=\"0 0 146 120\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14 44 L14 30 L70 30\" fill=\"none\" stroke=\"#3a3436\" stroke-width=\"3\"/><text x=\"20\" y=\"50\" font-family=\"Georgia,serif\" font-size=\"18\" font-weight=\"bold\" fill=\"#3a3436\">1.</text><path d=\"M76 44 L76 30 L132 30\" fill=\"none\" stroke=\"#3a3436\" stroke-width=\"3\"/><text x=\"82\" y=\"50\" font-family=\"Georgia,serif\" font-size=\"18\" font-weight=\"bold\" fill=\"#3a3436\">2.</text><line x1=\"14\" y1=\"60\" x2=\"132\" y2=\"60\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"14\" y1=\"71\" x2=\"132\" y2=\"71\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"14\" y1=\"82\" x2=\"132\" y2=\"82\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"14\" y1=\"93\" x2=\"132\" y2=\"93\" stroke=\"#c9b8bb\" stroke-width=\"2\"/><line x1=\"14\" y1=\"104\" x2=\"132\" y2=\"104\" stroke=\"#c9b8bb\" stroke-width=\"2\"/></svg>", "メトロノーム記号": "<svg viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"30\" cy=\"70\" rx=\"12\" ry=\"9\" fill=\"#3a3436\" transform=\"rotate(-22 30 70)\"/><rect x=\"39\" y=\"26\" width=\"3.6\" height=\"48\" fill=\"#3a3436\"/><text x=\"96\" y=\"80\" font-family=\"Georgia,serif\" font-size=\"34\" font-weight=\"bold\" fill=\"#3a3436\" text-anchor=\"middle\">=120</text></svg>"};
+const ITEMS = [{"cat": "note", "cps": [119133], "name": "全音符", "yomi": "ぜんおんぷ", "mean": "4はく のばす"}, {"cat": "note", "cps": [119134], "dot": true, "name": "付点二分音符", "yomi": "ふてんにぶおんぷ", "mean": "3はく のばす"}, {"cat": "note", "cps": [119134], "name": "二分音符", "yomi": "にぶおんぷ", "mean": "2はく のばす"}, {"cat": "note", "cps": [9833], "dot": true, "name": "付点四分音符", "yomi": "ふてんしぶおんぷ", "mean": "1はく半 のばす"}, {"cat": "note", "cps": [9833], "name": "四分音符", "yomi": "しぶおんぷ", "mean": "1はく"}, {"cat": "note", "cps": [9834], "dot": true, "name": "付点八分音符", "yomi": "ふてんはちぶおんぷ", "mean": "8分＋16分の長さ"}, {"cat": "note", "cps": [9834], "name": "八分音符", "yomi": "はちぶおんぷ", "mean": "はくの 半分"}, {"cat": "note", "cps": [119137], "name": "十六分音符", "yomi": "じゅうろくぶおんぷ", "mean": "さらに 半分"}, {"cat": "note", "svg": "三連符", "name": "三連符", "yomi": "さんれんぷ", "mean": "1つの音を 3等分"}, {"cat": "rest", "cps": [119099], "name": "全休符", "yomi": "ぜんきゅうふ", "mean": "4はく やすむ"}, {"cat": "rest", "cps": [119100], "name": "二分休符", "yomi": "にぶきゅうふ", "mean": "2はく やすむ"}, {"cat": "rest", "cps": [119101], "name": "四分休符", "yomi": "しぶきゅうふ", "mean": "1はく やすむ"}, {"cat": "rest", "cps": [119102], "name": "八分休符", "yomi": "はちぶきゅうふ", "mean": "はんぶん やすむ"}, {"cat": "rest", "cps": [119103], "name": "十六分休符", "yomi": "じゅうろくぶきゅうふ", "mean": "さらに はんぶん"}, {"cat": "mark", "cps": [119070], "name": "ト音記号", "yomi": "とおんきごう", "mean": "たかい音の めじるし"}, {"cat": "mark", "cps": [119074], "name": "ヘ音記号", "yomi": "へおんきごう", "mean": "ひくい音の めじるし"}, {"cat": "mark", "svg": "五線", "name": "五線", "yomi": "ごせん", "mean": "楽譜の 5本の線"}, {"cat": "mark", "svg": "加線", "name": "加線", "yomi": "かせん", "mean": "五線の外の みじかい線"}, {"cat": "mark", "svg": "小節線", "name": "小節線", "yomi": "しょうせつせん", "mean": "小節の くぎり"}, {"cat": "mark", "svg": "終止線", "name": "終止線", "yomi": "しゅうしせん", "mean": "曲の おわりの線"}, {"cat": "mark", "cps": [9839], "name": "シャープ", "yomi": "えいきごう ♯", "mean": "半音 たかく"}, {"cat": "mark", "cps": [9837], "name": "フラット", "yomi": "へんきごう ♭", "mean": "半音 ひくく"}, {"cat": "mark", "cps": [9838], "name": "ナチュラル", "yomi": "ほんいきごう ♮", "mean": "もとの たかさ"}, {"cat": "mark", "cps": [119183, 119183], "name": "ピアニッシモ", "yomi": "pp", "mean": "とても よわく"}, {"cat": "mark", "cps": [119183], "name": "ピアノ", "yomi": "p", "mean": "よわく"}, {"cat": "mark", "cps": [119184, 119183], "name": "メゾピアノ", "yomi": "mp", "mean": "すこし よわく"}, {"cat": "mark", "cps": [119184, 119185], "name": "メゾフォルテ", "yomi": "mf", "mean": "すこし つよく"}, {"cat": "mark", "cps": [119185], "name": "フォルテ", "yomi": "f", "mean": "つよく"}, {"cat": "mark", "cps": [119185, 119185], "name": "フォルティッシモ", "yomi": "ff", "mean": "とても つよく"}, {"cat": "mark", "svg": "クレッシェンド", "name": "クレッシェンド", "yomi": "cresc.", "mean": "だんだん つよく"}, {"cat": "mark", "svg": "デクレッシェンド", "name": "デクレッシェンド", "yomi": "decresc.", "mean": "だんだん よわく（＝ディミヌエンド）"}, {"cat": "mark", "svg": "4分の2拍子", "name": "4分の2拍子", "yomi": "よんぶんのにびょうし", "mean": "1小節に 4分音符2つ"}, {"cat": "mark", "svg": "4分の3拍子", "name": "4分の3拍子", "yomi": "よんぶんのさんびょうし", "mean": "1小節に 4分音符3つ"}, {"cat": "mark", "svg": "4分の4拍子", "name": "4分の4拍子", "yomi": "よんぶんのよんびょうし", "mean": "1小節に 4分音符4つ"}, {"cat": "mark", "svg": "8分の6拍子", "name": "8分の6拍子", "yomi": "はちぶんのろくびょうし", "mean": "1小節に 8分音符6つ"}, {"cat": "mark", "svg": "リピート", "name": "リピート", "yomi": "くりかえし", "mean": "間を くりかえす"}, {"cat": "mark", "svg": "1番2番かっこ", "name": "1番・2番かっこ", "yomi": "いちばん・にばんかっこ", "mean": "2回目は 2へ とぶ"}, {"cat": "mark", "txt": "D.C.", "name": "ダ・カーポ", "yomi": "だ・かーぽ", "mean": "曲の 最初へ もどる"}, {"cat": "mark", "txt": "D.S.", "name": "ダル・セーニョ", "yomi": "だる・せーにょ", "mean": "セーニョへ もどる"}, {"cat": "mark", "cps": [119051], "name": "セーニョ", "yomi": "せーにょ", "mean": "もどる 目じるし"}, {"cat": "mark", "cps": [119052], "name": "コーダ", "yomi": "こーだ", "mean": "とびこす 目じるし"}, {"cat": "mark", "cps": [119056], "name": "フェルマータ", "yomi": "ふぇるまーた", "mean": "ほどよく のばす"}, {"cat": "mark", "svg": "タイ", "name": "タイ", "yomi": "たい", "mean": "同じ高さを つなぐ"}, {"cat": "mark", "svg": "スラー", "name": "スラー", "yomi": "すらー", "mean": "なめらかに つなぐ"}, {"cat": "mark", "svg": "スタッカート", "name": "スタッカート", "yomi": "すたっかーと", "mean": "みじかく 切る"}, {"cat": "mark", "svg": "テヌート", "name": "テヌート", "yomi": "てぬーと", "mean": "長さを たもつ"}, {"cat": "mark", "svg": "アクセント", "name": "アクセント", "yomi": "あくせんと", "mean": "強く めだたせる"}, {"cat": "mark", "svg": "ブレス", "name": "ブレス", "yomi": "ぶれす", "mean": "いきつぎ"}, {"cat": "mark", "svg": "メトロノーム記号", "name": "メトロノーム記号", "yomi": "めとろのーむきごう", "mean": "速さを 数で しめす"}];
+const fc = (...cps) => String.fromCodePoint(...cps);
+
+// build the glyph HTML for an item
+function glyphHTML(it){
+  if(it.svg) return SVGMAP[it.svg] || "";
+  if(it.txt) return `<span class="dyn">${it.txt}</span>`;
+  return `<span class="mus">${fc(...it.cps)}${it.dot ? "." : ""}</span>`;
+}
+
+const CAT_LABEL = {note:"🎵 音符（おんぷ）", rest:"💤 休符（きゅうふ）", mark:"🎼 記号（きごう）"};
+const CAT_ICON  = {note:0x2669, rest:0x1D13D, mark:0x1D11E};
+const $ = id => document.getElementById(id);
+let count = "10", deck = [], idx = 0, revealed = false;
+
+document.querySelectorAll('[data-ico]').forEach(el=>{ el.textContent = fc(CAT_ICON[el.dataset.ico]); });
+
+(function renderList(){
+  let html = "";
+  ["note","rest","mark"].forEach(cat=>{
+    html += `<div class="listcat">${CAT_LABEL[cat]}</div><div class="listgrid">`;
+    ITEMS.filter(i=>i.cat===cat).forEach(i=>{
+      html += `<div class="li"><span class="lg">${glyphHTML(i)}</span><span class="ln">${i.name}</span><span class="lm">${i.mean}</span></div>`;
+    });
+    html += `</div>`;
+  });
+  $('listbody').innerHTML = html;
+})();
+
+$('cats').addEventListener('click', e=>{
+  const c = e.target.closest('.cat'); if(!c) return;
+  c.classList.toggle('on'); $('warn').textContent="";
+});
+$('counts').addEventListener('click', e=>{
+  const c = e.target.closest('.count'); if(!c) return;
+  document.querySelectorAll('.count').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); count = c.dataset.count;
+});
+
+const selectedCats = () => [...document.querySelectorAll('.cat.on')].map(c=>c.dataset.cat);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildDeck(pool,n){
+  let d=[];
+  while(d.length<n){
+    let s=shuffle([...pool]);
+    if(d.length && s[0]===d[d.length-1] && s.length>1){[s[0],s[1]]=[s[1],s[0]];}
+    d=d.concat(s);
+  }
+  return d.slice(0,n);
+}
+const show = scr => {document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(scr).classList.add('active');};
+
+$('start').addEventListener('click', ()=>{
+  const cats = selectedCats();
+  if(cats.length===0){ $('warn').textContent="ひとつ いじょう えらんでね"; return; }
+  const pool = ITEMS.filter(it=>cats.includes(it.cat));
+  const n = count==="all" ? pool.length : parseInt(count);
+  deck = buildDeck(pool, n);
+  idx = 0; $('ptot').textContent = deck.length;
+  show('card'); render();
+});
+
+function render(){
+  revealed = false;
+  const it = deck[idx];
+  $('flash').classList.remove('revealed');
+  $('glyph').innerHTML = glyphHTML(it);
+  $('yomi').textContent = it.yomi;
+  $('name').textContent = it.name;
+  $('mean').textContent = it.mean;
+  $('pnow').textContent = idx+1;
+  $('fill').style.width = (idx/deck.length*100)+"%";
+  $('hint').innerHTML = `<span class="tap">✋</span> タップで こたえ`;
+}
+
+$('flash').addEventListener('click', ()=>{
+  if(!revealed){
+    revealed = true;
+    $('flash').classList.add('revealed');
+    $('fill').style.width = ((idx+1)/deck.length*100)+"%";
+    const last = idx === deck.length-1;
+    $('hint').innerHTML = last ? `<span class="tap">✋</span> タップで おわり`
+                               : `<span class="tap">✋</span> タップで つぎ →`;
+  } else {
+    idx++;
+    if(idx >= deck.length) finish();
+    else render();
+  }
+});
+
+$('back').addEventListener('click', ()=> show('settings'));
+function finish(){ $('donenum').textContent = `${deck.length}もん クリア！`; show('done'); }
+$('again').addEventListener('click', ()=>{ idx=0; deck=shuffle(deck); $('ptot').textContent=deck.length; show('card'); render(); });
+$('toset').addEventListener('click', ()=> show('settings'));
+</script>
+</body>
+</html>
